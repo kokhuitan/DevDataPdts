@@ -1,0 +1,66 @@
+Developing Data Products
+========================================================
+author: Tan Kok Hui
+date: 26 Apr 2015
+
+BMI
+========================================================
+
+Body Mass Index (BMI) is an indicator of general health based solely on 
+weight and height. For more detailed examination, please 
+consult your general practitioner.
+
+It is calculated as follows:
+
+$BMI = \frac{(\text{weight in kg})}{(\text{height in m})^2}$
+
+The Shiny html
+========================================================
+In this easy to use interface, the user is asked to enter his/her 
+weight and height in the textboxes. After submitting, the result 
+will be shown on the right panel.
+
+![](shiny.jpg)
+
+ui.R Code
+========================================================
+
+```{r}
+library(shiny)
+shinyUI(pageWithSidebar(
+  headerPanel("Body Mass Index (BMI) calculator"),
+  sidebarPanel(
+    h3('Enter your information below'),
+    numericInput("weight", "Weigth (kg)", value = 60, min = 1, max = 1000, step=1),
+    numericInput("height", "heigth (cm)", value = 170, min = 30, max = 300, step=1),
+    submitButton("Submit")
+  ),
+  mainPanel(
+    h3('Result'),
+    h4("BMI"),
+    verbatimTextOutput("bmi"),
+    h4("Status"),
+    verbatimTextOutput("status")
+  )
+))
+```
+
+server.R Code
+========================================================
+
+```{r}
+library(shiny)
+status<- function(bmi) {
+  if(bmi<=18.5) return("underweight") 
+  else if(bmi<25) return("healthy weight")
+  else if(bmi>=25) return("overweight")
+}
+
+shinyServer(
+  function(input, output) {
+    bmi <- reactive({input$weight/(input$height/100)^2})
+    output$bmi <- renderPrint({bmi()})
+    output$status <- renderText({status(bmi())})
+  }
+)
+```
